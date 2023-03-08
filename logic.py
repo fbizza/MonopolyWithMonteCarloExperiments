@@ -9,7 +9,7 @@ board = ["Via!", "Vicolo Corto", "Probabilità_1", "Vicolo Stretto", "Tassa Patr
          "Probabilità_3", "Largo Augusto", "Stazione EST", "Imprevisti_3", "Viale dei Giardini",
          "Tassa del Lusso", "Parco della Vittoria"]
 
-num_rolls = 100000
+num_rolls = 1000
 go_to_jail = board.index("In Prigione!")
 jail = board.index("Prigione/Transito")
 
@@ -21,3 +21,35 @@ def update_position(current_position, dice_1, dice_2):
         return jail
     else:
         return (current_position + dice_1 + dice_2) % len(board)
+
+
+# To store how many times positions in the board are visited
+histogram = {idx: 0 for idx in range(len(board))}
+
+# Initialize values for starting the game
+current_position = 0
+in_jail = False
+jail_counter = 0
+
+# Main loop that simulates the game of a single piece
+for i in range(num_rolls):
+    if in_jail and jail_counter < 3:
+        dice_1 = roll_dice()
+        dice_2 = roll_dice()
+        if dice_1 == dice_2:  # Go out of jail rule
+            in_jail = False
+            jail_counter = 0
+            current_position = update_position(current_position, dice_1, dice_2)
+        else:
+            jail_counter += 1
+    else:
+        dice_1 = roll_dice()
+        dice_2 = roll_dice()
+        current_position = update_position(current_position, dice_1, dice_2)
+
+    if current_position == go_to_jail:
+        in_jail = True
+        current_position == jail
+
+    histogram[current_position] += 1
+
