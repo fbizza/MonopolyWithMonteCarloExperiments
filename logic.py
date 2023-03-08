@@ -1,4 +1,6 @@
 import random
+import numpy as np
+import matplotlib.pyplot as plt
 
 board = ["Via!", "Vicolo Corto", "Probabilità_1", "Vicolo Stretto", "Tassa Patrimoniale", "Stazione SUD",
          "Bastioni Gran Sasso", "Imprevisti_1", "Viale Monterosa", "Viale Vesuvio", "Prigione/Transito", "Via Accademia",
@@ -53,3 +55,13 @@ for i in range(num_rolls):
 
     histogram[current_position] += 1
 
+
+positions = list(histogram.keys())
+counters = list(histogram.values())
+frequencies = np.divide(counters, num_rolls)
+
+plt.bar(positions, frequencies, label="Real distribution")
+plt.ylabel('Probability')
+plt.xlabel('Position')
+plt.xticks(list(positions))
+plt.show()
