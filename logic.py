@@ -12,18 +12,45 @@ board = ["Via!", "Vicolo Corto", "Probabilità_1", "Vicolo Stretto", "Tassa Patr
          "Tassa del Lusso", "Parco della Vittoria"]
 
 
-num_pieces = 9000  # The number of pieces to simulate
+num_pieces = 90000  # The number of pieces to simulate
 num_rolls = 30
 go_to_jail = board.index("In Prigione!")
 jail = board.index("Prigione/Transito")
-
+special_positions = [board.index("Imprevisti_1"), board.index("Imprevisti_2"), board.index("Imprevisti_3"),
+                     board.index("Probabilità_1"), board.index("Probabilità_2"), board.index("Probabilità_3")]
+special_cards = {"Via": 1/16, "Prigione": 2/16, "Accademia": 1/16, "Colombo": 1/16, "Vicolo Corto": 1/16,
+                 "Stazione": 1/16, "Parco della Vittoria": 1/16, "Other": 8/16}
 
 def roll_dice():
     return random.randint(1, 6)
 
+def draw_a_special_card():
+    cards = list(special_cards.keys())
+    weights = list(special_cards.values())
+    carta = random.choices(cards, weights=weights)[0]
+    return carta
+
 def update_position(current_position, dice_1, dice_2):
     if (current_position + dice_1 + dice_2) % len(board) == go_to_jail:
         return jail
+    elif (current_position + dice_1 + dice_2) % len(board) in special_positions:
+        card = draw_a_special_card()
+        if card == "Via":
+            return board.index("Via!")
+        elif card == "Prigione":
+            return jail
+        elif card == "Accademia":
+            return board.index("Via Accademia")
+        elif card == "Colombo":
+            return board.index("Largo Colombo")
+        elif card == "Vicolo Corto":
+            return board.index("Vicolo Corto")
+        elif card == "Stazione":
+            return board.index("Stazione NORD")
+        elif card == "Parco della Vittoria":
+            return board.index("Parco della Vittoria")
+        elif card == "Other":
+            return (current_position + dice_1 + dice_2) % len(board)
     else:
         return (current_position + dice_1 + dice_2) % len(board)
 
