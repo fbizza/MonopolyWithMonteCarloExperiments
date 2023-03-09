@@ -11,9 +11,12 @@ board = ["Via!", "Vicolo Corto", "Probabilità_1", "Vicolo Stretto", "Tassa Patr
          "Probabilità_3", "Largo Augusto", "Stazione EST", "Imprevisti_3", "Viale dei Giardini",
          "Tassa del Lusso", "Parco della Vittoria"]
 
-num_rolls = 1000
+
+num_pieces = 9000  # The number of pieces to simulate
+num_rolls = 30
 go_to_jail = board.index("In Prigione!")
 jail = board.index("Prigione/Transito")
+
 
 def roll_dice():
     return random.randint(1, 6)
@@ -25,43 +28,52 @@ def update_position(current_position, dice_1, dice_2):
         return (current_position + dice_1 + dice_2) % len(board)
 
 
-# To store how many times positions in the board are visited
-histogram = {idx: 0 for idx in range(len(board))}
+# To store how many times positions in the board are visited for each piece
+local_histograms = [{idx: 0 for idx in range(len(board))} for i in range(num_pieces)]
 
-# Initialize values for starting the game
-current_position = 0
-in_jail = False
-jail_counter = 0
+# Initialize values to start the game
+current_positions = [0] * num_pieces
+in_jails = [False] * num_pieces
+jail_counters = [0] * num_pieces
 
-# Main loop that simulates the game of a single piece
+# Main loop that simulates the game
 for i in range(num_rolls):
-    if in_jail and jail_counter < 3:
-        dice_1 = roll_dice()
-        dice_2 = roll_dice()
-        if dice_1 == dice_2:  # Go out of jail rule
-            in_jail = False
-            jail_counter = 0
-            current_position = update_position(current_position, dice_1, dice_2)
+    for j in range(num_pieces):
+        if in_jails[j] and jail_counters[j] < 3:
+            dice_1 = roll_dice()
+            dice_2 = roll_dice()
+            if dice_1 == dice_2:  # Go out of jail rule
+                in_jails[j] = False
+                jail_counters[j] = 0
+                current_positions[j] = update_position(current_positions[j], dice_1, dice_2)
+            else:
+                jail_counters[j] += 1
         else:
-            jail_counter += 1
-    else:
-        dice_1 = roll_dice()
-        dice_2 = roll_dice()
-        current_position = update_position(current_position, dice_1, dice_2)
+            dice_1 = roll_dice()
+            dice_2 = roll_dice()
+            current_positions[j] = update_position(current_positions[j], dice_1, dice_2)
 
-    if current_position == go_to_jail:
-        in_jail = True
-        current_position == jail
+        if current_positions[j] == go_to_jail:
+            in_jails[j] = True
+            current_positions[j] == jail
 
-    histogram[current_position] += 1
+        local_histograms[j][current_positions[j]] += 1
 
+# Combine the histograms of each piece to create a global one
+global_histogram = {}
+for histogram in local_histograms:
+    for position, count in histogram.items():
+        if position in global_histogram:
+            global_histogram[position] += count
+        else:
+            global_histogram[position] = count
 
-positions = list(histogram.keys())
-counters = list(histogram.values())
-frequencies = np.divide(counters, num_rolls)
+positions = list(global_histogram.keys())
+counters = list(global_histogram.values())
+frequencies = np.divide(counters, (num_rolls * num_pieces))
 
-plt.bar(positions, frequencies, label="Real distribution")
+plt.bar(positions, frequencies)
 plt.ylabel('Probability')
 plt.xlabel('Position')
-plt.xticks(list(positions))
+plt.xticks(positions)
 plt.show()
