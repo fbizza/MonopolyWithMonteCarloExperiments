@@ -16,7 +16,7 @@ jail = board.index("Prigione/Transito")
 special_positions = [board.index("Imprevisti_1"), board.index("Imprevisti_2"), board.index("Imprevisti_3"),
                      board.index("Probabilità_1"), board.index("Probabilità_2"), board.index("Probabilità_3")]
 special_cards = {"Via": 1/32, "Prigione": 2/32, "Accademia": 1/32, "Colombo": 1/32, "Vicolo Corto": 1/32,
-                 "Stazione": 1/32, "Parco della Vittoria": 1/32, "Other": 8/32}
+                 "Stazione": 1/32, "Parco della Vittoria": 1/32, "Other": 16/32}
 
 def roll_dice():
     return random.randint(1, 6)
@@ -52,6 +52,7 @@ def update_position(current_position, dice_1, dice_2):
         return (current_position + dice_1 + dice_2) % len(board)
 
 def color_plot(plot):
+    # To set colors of properties in the histogram
     plot[1].set_color('sienna')
     plot[3].set_color('sienna')
     plot[6].set_color('lightblue')
@@ -121,7 +122,7 @@ def simulate_game(num_rolls, num_pieces):
     counters = list(global_histogram.values())
     frequencies = np.divide(counters, (num_rolls * num_pieces)/100)
 
-    ytick_values = [frequencies[0], frequencies[10], frequencies[25]]
+    ytick_values = [frequencies[10], frequencies[24]]
 
     plot = color_plot(plt.bar(positions, frequencies))
     plt.ylabel('Probability (%)')
